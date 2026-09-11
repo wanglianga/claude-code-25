@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
 
-    public enum Role { PARENT, TEACHER, HEALTH, DIRECTOR, FRONTDESK }
+    public enum Role { PARENT, TEACHER, HEALTH, DIRECTOR, FRONTDESK, KITCHEN }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

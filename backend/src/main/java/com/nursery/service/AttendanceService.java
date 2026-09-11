@@ -28,6 +28,7 @@ public class AttendanceService {
     private final PickupRecordRepository pickupRecordRepo;
     private final PickupMessageRepository pickupMessageRepo;
     private final NurseryEventRepository eventRepo;
+    private final MealSubstitutionRepository mealSubRepo;
     private final AccessService accessService;
     private final EventService eventService;
     private final AlertService alertService;
@@ -39,6 +40,7 @@ public class AttendanceService {
                              PickupRecordRepository pickupRecordRepo,
                              PickupMessageRepository pickupMessageRepo,
                              NurseryEventRepository eventRepo,
+                             MealSubstitutionRepository mealSubRepo,
                              AccessService accessService,
                              EventService eventService,
                              AlertService alertService) {
@@ -49,6 +51,7 @@ public class AttendanceService {
         this.pickupRecordRepo = pickupRecordRepo;
         this.pickupMessageRepo = pickupMessageRepo;
         this.eventRepo = eventRepo;
+        this.mealSubRepo = mealSubRepo;
         this.accessService = accessService;
         this.eventService = eventService;
         this.alertService = alertService;
@@ -216,6 +219,10 @@ public class AttendanceService {
         m.put("pickupMessages", pickupMessageRepo.findByChildIdAndMsgDateOrderByCreatedAtAsc(childId, date));
         m.put("events", eventRepo.findByChildIdAndCreatedAtBetweenOrderByCreatedAtAsc(
                 childId, date.atStartOfDay(), date.plusDays(1).atStartOfDay()));
+        // 当日过敏餐替换单（出餐/分餐后已同步为「用餐」照护记录）
+        m.put("mealSubstitutions", mealSubRepo.findByChildIdAndMealDate(childId, date).stream()
+                .filter(s -> s.getStatus() != MealSubstitution.Status.CANCELLED)
+                .collect(Collectors.toList()));
         return m;
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 数据访问权限规则：
- * - 园长 / 保健老师 / 前台：可查看全部儿童
+ * - 园长 / 保健老师 / 前台 / 厨房：可查看全部儿童
  * - 老师：仅本班儿童
  * - 家长：仅自己的孩子
  */
@@ -17,7 +17,7 @@ public class AccessService {
 
     public boolean canViewChild(User user, Child child) {
         return switch (user.getRole()) {
-            case DIRECTOR, HEALTH, FRONTDESK -> true;
+            case DIRECTOR, HEALTH, FRONTDESK, KITCHEN -> true;
             case PARENT -> child.getParent().getId().equals(user.getId());
             case TEACHER -> isTeacherOf(user, child);
         };

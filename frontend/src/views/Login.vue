@@ -46,6 +46,7 @@ const demoAccounts = [
   { label: '老师', username: 'teacher1' },
   { label: '老师2', username: 'teacher2' },
   { label: '前台', username: 'frontdesk' },
+  { label: '厨房', username: 'kitchen' },
   { label: '家长1', username: 'parent1' },
   { label: '家长2', username: 'parent2' },
   { label: '家长3', username: 'parent3' }

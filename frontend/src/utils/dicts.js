@@ -30,7 +30,8 @@ export const dicts = {
     MEDICATION: { label: '喂药', type: 'warning' },
     TOILET: { label: '如厕', type: 'info' },
     SLEEP: { label: '睡眠', type: 'success' },
-    INJURY: { label: '活动伤情', type: 'danger' }
+    INJURY: { label: '活动伤情', type: 'danger' },
+    MEAL: { label: '用餐', type: 'success' }
   },
   severity: {
     NORMAL: { label: '一般', type: 'success' },
@@ -98,14 +99,34 @@ export const dicts = {
     PICKUP: { label: '接送', type: 'primary' },
     EVENT: { label: '事件', type: 'danger' },
     COMMUNICATION: { label: '沟通', type: 'warning' },
-    ALERT: { label: '预警', type: 'danger' }
+    ALERT: { label: '预警', type: 'danger' },
+    MEAL: { label: '过敏餐替换', type: 'warning' }
+  },
+  mealType: {
+    LUNCH: { label: '午餐', type: 'primary' },
+    SNACK: { label: '午点', type: 'success' }
+  },
+  mealReason: {
+    INGREDIENT_SHORTAGE: { label: '食材缺货', type: 'warning' },
+    ALLERGEN_RISK: { label: '过敏源风险', type: 'danger' }
+  },
+  mealSubStatus: {
+    PENDING_HEALTH: { label: '待保健老师确认', type: 'warning' },
+    PENDING_TEACHER: { label: '待班级老师确认', type: 'warning' },
+    PENDING_PARENT: { label: '待家长确认', type: 'warning' },
+    CONFIRMED: { label: '待厨房出餐', type: 'primary' },
+    EXECUTED: { label: '已出餐待分餐', type: 'primary' },
+    SERVED: { label: '已分餐', type: 'success' },
+    REJECTED: { label: '已拒绝', type: 'danger' },
+    CANCELLED: { label: '已取消', type: 'info' }
   },
   role: {
     PARENT: '家长',
     TEACHER: '老师',
     HEALTH: '保健老师',
     DIRECTOR: '园长',
-    FRONTDESK: '前台'
+    FRONTDESK: '前台',
+    KITCHEN: '厨房'
   }
 }
 

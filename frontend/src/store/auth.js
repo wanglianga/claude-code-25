@@ -15,7 +15,8 @@ export const useAuthStore = defineStore('auth', {
         TEACHER: '老师',
         HEALTH: '保健老师',
         DIRECTOR: '园长',
-        FRONTDESK: '前台'
+        FRONTDESK: '前台',
+        KITCHEN: '厨房'
       }
       return map[s.user?.role] || ''
     }

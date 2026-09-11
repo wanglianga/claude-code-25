@@ -39,6 +39,8 @@ public class DataInitializer implements CommandLineRunner {
     private final PickupRecordRepository pickupRecordRepo;
     private final NurseryEventRepository eventRepo;
     private final EventMessageRepository messageRepo;
+    private final DailyMenuRepository menuRepo;
+    private final MealSubstitutionRepository mealSubRepo;
     private final PasswordEncoder passwordEncoder;
     private final EventService eventService;
     private final AlertService alertService;
@@ -57,6 +59,8 @@ public class DataInitializer implements CommandLineRunner {
                            PickupRecordRepository pickupRecordRepo,
                            NurseryEventRepository eventRepo,
                            EventMessageRepository messageRepo,
+                           DailyMenuRepository menuRepo,
+                           MealSubstitutionRepository mealSubRepo,
                            PasswordEncoder passwordEncoder,
                            EventService eventService, AlertService alertService) {
         this.userRepo = userRepo;
@@ -75,6 +79,8 @@ public class DataInitializer implements CommandLineRunner {
         this.pickupRecordRepo = pickupRecordRepo;
         this.eventRepo = eventRepo;
         this.messageRepo = messageRepo;
+        this.menuRepo = menuRepo;
+        this.mealSubRepo = mealSubRepo;
         this.passwordEncoder = passwordEncoder;
         this.eventService = eventService;
         this.alertService = alertService;
@@ -95,6 +101,7 @@ public class DataInitializer implements CommandLineRunner {
         User teacher1 = user("teacher1", "陈老师", User.Role.TEACHER, "13900000003");
         User teacher2 = user("teacher2", "林老师", User.Role.TEACHER, "13900000004");
         User frontdesk = user("frontdesk", "赵前台", User.Role.FRONTDESK, "13900000005");
+        User kitchen = user("kitchen", "孙厨师", User.Role.KITCHEN, "13900000006");
         User parent1 = user("parent1", "张家长", User.Role.PARENT, "13800000001");
         User parent2 = user("parent2", "李家长", User.Role.PARENT, "13800000002");
         User parent3 = user("parent3", "王家长", User.Role.PARENT, "13800000003");
@@ -232,10 +239,35 @@ public class DataInitializer implements CommandLineRunner {
                 EnrollmentApplication.Status.PENDING_HEALTH, today.minusDays(2));
         assignment(ddApp, c3, director, "果果班活动量大，符合家长期望；容量充足", today.minusDays(1));
 
+        // ---------- 过敏餐临时替换（厨房发起 → 保健/班级老师确认 → 家长确认 → 出餐/分餐） ----------
+        // 昨日午餐：鲜虾缺货，乐乐「虾仁蒸蛋」替换为「香菇肉末蒸蛋」（确认链已走完并分餐）
+        DailyMenu menuYesterday = menu(today.minusDays(1), DailyMenu.MealType.LUNCH,
+                "虾仁蒸蛋、软米饭、蒜蓉西兰花",
+                "鲜虾、鸡蛋、大米、西兰花、蒜",
+                "优质蛋白+碳水+绿叶蔬菜，符合2-3岁午餐营养配比", kitchen);
+        mealSub(menuYesterday, lele,
+                MealSubstitution.Reason.INGREDIENT_SHORTAGE, "鲜虾临时缺货",
+                "虾仁蒸蛋", "香菇肉末蒸蛋", "猪肉末、香菇、鸡蛋", null,
+                MealSubstitution.Status.SERVED, kitchen, health, teacher2, today.minusDays(1));
+        mealCareRecord(lele, today.minusDays(1), kitchen, 11, 20,
+                "替代餐出餐：「香菇肉末蒸蛋」（原「虾仁蒸蛋」，食材缺货）。家长确认时间 09:12；保健老师 刘保健、班级老师 林老师 已审核。");
+        mealCareRecord(lele, today.minusDays(1), teacher2, 11, 40,
+                "替代餐已分餐：「香菇肉末蒸蛋」（原「虾仁蒸蛋」，食材缺货）。家长确认时间 09:12；孩子进食良好。");
+
+        // 今日午餐：含花生酱，命中乐乐花生过敏档案 → 替换单已过保健/班级老师，待家长确认
+        DailyMenu menuToday = menu(today, DailyMenu.MealType.LUNCH,
+                "花生酱拌面、清炒时蔬、番茄蛋花汤",
+                "花生酱、面条、青菜、番茄、鸡蛋、香葱",
+                "碳水+优质蛋白+绿叶蔬菜，符合2-3岁午餐营养配比", kitchen);
+        mealSub(menuToday, lele,
+                MealSubstitution.Reason.ALLERGEN_RISK, "今日午餐含花生酱，命中儿童花生过敏档案",
+                "花生酱拌面", "鸡丝麻酱拌面", "芝麻酱、鸡胸肉、面条、青菜", "花生",
+                MealSubstitution.Status.PENDING_PARENT, kitchen, health, teacher2, today);
+
         // ---------- 异常预警（乐乐近30天多次异常） ----------
         alertService.checkChild(lele);
 
-        log.info("演示数据初始化完成。演示账号：director/health/teacher1/teacher2/frontdesk/parent1/parent2/parent3，密码均为 123456");
+        log.info("演示数据初始化完成。演示账号：director/health/teacher1/teacher2/frontdesk/kitchen/parent1/parent2/parent3，密码均为 123456");
     }
 
     // ---------- 辅助方法 ----------
@@ -407,5 +439,92 @@ public class DataInitializer implements CommandLineRunner {
         event.setCreatedAt(resolveDate.atTime(9, 0));
         event.setUpdatedAt(resolveDate.atTime(18, 0));
         eventRepo.save(event);
+    }
+
+    private DailyMenu menu(LocalDate date, DailyMenu.MealType mealType, String dishes,
+                           String ingredients, String nutritionNotes, User kitchen) {
+        DailyMenu m = new DailyMenu();
+        m.setMenuDate(date);
+        m.setMealType(mealType);
+        m.setDishes(dishes);
+        m.setIngredients(ingredients);
+        m.setNutritionNotes(nutritionNotes);
+        m.setCreatedBy(kitchen);
+        m.setCreatedAt(date.atTime(7, 30));
+        m.setUpdatedAt(date.atTime(7, 30));
+        return menuRepo.save(m);
+    }
+
+    /**
+     * 演示用替换单：按目标状态补齐确认链时间戳（保健 08:40 → 老师 08:55 → 家长 09:12 → 出餐 11:20 → 分餐 11:40）。
+     */
+    private MealSubstitution mealSub(DailyMenu menu, Child child, MealSubstitution.Reason reason,
+                                     String trigger, String originalDish, String substituteDish,
+                                     String subIngredients, String matchedAllergy,
+                                     MealSubstitution.Status status, User kitchen,
+                                     User health, User teacher, LocalDate date) {
+        MealSubstitution s = new MealSubstitution();
+        s.setMenu(menu);
+        s.setChild(child);
+        s.setMealDate(menu.getMenuDate());
+        s.setReason(reason);
+        s.setTriggerDetail(trigger);
+        s.setOriginalDish(originalDish);
+        s.setSubstituteDish(substituteDish);
+        s.setSubstituteIngredients(subIngredients);
+        s.setMatchedAllergy(matchedAllergy);
+        String check = "平台比对：儿童档案过敏源「花生」；"
+                + (reason == MealSubstitution.Reason.INGREDIENT_SHORTAGE
+                    ? "本次为食材缺货触发的临时替换，菜单未直接命中过敏源；"
+                    : "当日菜单食材命中过敏源「" + matchedAllergy + "」，须替换；")
+                + "替代食材「" + subIngredients + "」经核验不含该儿童过敏源；"
+                + "替代餐保留同等主食与优质蛋白/蔬果搭配，符合当日营养要求（菜单营养基准："
+                + menu.getNutritionNotes() + "）。";
+        s.setNutritionCheck(check);
+        s.setStatus(status);
+        s.setCreatedBy(kitchen);
+        s.setCreatedAt(date.atTime(8, 20));
+        s.setUpdatedAt(date.atTime(8, 20));
+        // 按状态推进确认链
+        if (status != MealSubstitution.Status.PENDING_HEALTH) {
+            s.setHealthConfirmedBy(health);
+            s.setHealthConfirmedAt(date.atTime(8, 40));
+            s.setHealthNote("替代食材已核验，无花生成分，同意替换");
+        }
+        if (status == MealSubstitution.Status.PENDING_PARENT
+                || status == MealSubstitution.Status.CONFIRMED
+                || status == MealSubstitution.Status.EXECUTED
+                || status == MealSubstitution.Status.SERVED) {
+            s.setTeacherConfirmedBy(teacher);
+            s.setTeacherConfirmedAt(date.atTime(8, 55));
+            s.setTeacherNote("已知悉，分餐时将单独核对替代餐");
+        }
+        if (status == MealSubstitution.Status.CONFIRMED
+                || status == MealSubstitution.Status.EXECUTED
+                || status == MealSubstitution.Status.SERVED) {
+            s.setParentConfirmedAt(date.atTime(9, 12));
+            s.setParentNote("同意替换，辛苦老师留意");
+        }
+        if (status == MealSubstitution.Status.EXECUTED || status == MealSubstitution.Status.SERVED) {
+            s.setKitchenExecutedBy(kitchen);
+            s.setKitchenExecutedAt(date.atTime(11, 20));
+        }
+        if (status == MealSubstitution.Status.SERVED) {
+            s.setServedBy(teacher);
+            s.setServedAt(date.atTime(11, 40));
+        }
+        return mealSubRepo.save(s);
+    }
+
+    private void mealCareRecord(Child child, LocalDate date, User operator, int hour, int minute, String detail) {
+        CareRecord r = new CareRecord();
+        r.setChild(child);
+        r.setRecordDate(date);
+        r.setType(CareRecord.CareType.MEAL);
+        r.setDetail(detail);
+        r.setSeverity(CareRecord.Severity.NORMAL);
+        r.setRecordedBy(operator);
+        r.setCreatedAt(date.atTime(hour, minute));
+        careRecordRepo.save(r);
     }
 }

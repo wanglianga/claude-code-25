@@ -28,6 +28,7 @@ public class TimelineService {
     private final EventMessageRepository messageRepo;
     private final AnomalyAlertRepository alertRepo;
     private final ChildRepository childRepo;
+    private final MealSubstitutionRepository mealSubRepo;
 
     public TimelineService(EnrollmentApplicationRepository applicationRepo,
                            ClassAssignmentRepository assignmentRepo,
@@ -38,7 +39,8 @@ public class TimelineService {
                            NurseryEventRepository eventRepo,
                            EventMessageRepository messageRepo,
                            AnomalyAlertRepository alertRepo,
-                           ChildRepository childRepo) {
+                           ChildRepository childRepo,
+                           MealSubstitutionRepository mealSubRepo) {
         this.applicationRepo = applicationRepo;
         this.assignmentRepo = assignmentRepo;
         this.assessmentRepo = assessmentRepo;
@@ -49,6 +51,7 @@ public class TimelineService {
         this.messageRepo = messageRepo;
         this.alertRepo = alertRepo;
         this.childRepo = childRepo;
+        this.mealSubRepo = mealSubRepo;
     }
 
     public List<TimelineItem> childTimeline(Long childId) {
@@ -111,6 +114,17 @@ public class TimelineService {
             items.add(new TimelineItem(a.getCreatedAt(), "ALERT",
                     "异常预警：" + suggestionLabel(a.getSuggestion()),
                     a.getReason() + (a.getHandleNote() != null ? "｜处理：" + a.getHandleNote() : ""), a.getId()));
+        }
+        for (MealSubstitution s : mealSubRepo.findByChildIdOrderByCreatedAtDesc(childId)) {
+            items.add(new TimelineItem(s.getCreatedAt(), "MEAL",
+                    "过敏餐替换[" + mealSubStatusLabel(s.getStatus()) + "] 「" + s.getOriginalDish()
+                            + "」→「" + s.getSubstituteDish() + "」",
+                    (s.getReason() == MealSubstitution.Reason.INGREDIENT_SHORTAGE ? "食材缺货" : "过敏源风险")
+                            + (s.getMatchedAllergy() != null ? "（命中：" + s.getMatchedAllergy() + "）" : "")
+                            + (s.getParentConfirmedAt() != null
+                                ? "｜家长确认 " + s.getParentConfirmedAt().toLocalTime().withNano(0) : "")
+                            + (s.getServedAt() != null ? "｜已分餐 " + s.getServedAt().toLocalTime().withNano(0) : ""),
+                    s.getId()));
         }
         items.sort(Comparator.comparing(TimelineItem::time).reversed());
         return items;
@@ -226,7 +240,12 @@ public class TimelineService {
             case TOILET -> "如厕";
             case SLEEP -> "睡眠";
             case INJURY -> "活动伤情";
+            case MEAL -> "用餐";
         };
+    }
+
+    private String mealSubStatusLabel(MealSubstitution.Status s) {
+        return MealService.statusLabel(s);
     }
 
     private String severitySuffix(CareRecord.Severity s) {

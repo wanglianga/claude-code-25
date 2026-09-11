@@ -29,6 +29,16 @@
           </div>
         </el-card>
 
+        <el-card v-if="daily.mealSubstitutions?.length" shadow="never" class="inner mb12">
+          <template #header><b>当日过敏餐替换</b></template>
+          <div v-for="s in daily.mealSubstitutions" :key="s.id" class="med-row">
+            <el-tag type="warning" size="small" effect="dark">替代餐</el-tag>
+            <span>「{{ s.originalDish }}」→「{{ s.substituteDish }}」</span>
+            <el-tag :type="dType('mealSubStatus', s.status)" size="small">{{ d('mealSubStatus', s.status) }}</el-tag>
+            <span class="muted">家长确认：{{ s.parentConfirmedAt ? fmt(s.parentConfirmedAt) : '未确认（人工照护）' }}</span>
+          </div>
+        </el-card>
+
         <el-timeline v-if="daily.careRecords?.length" class="pt8">
           <el-timeline-item v-for="r in daily.careRecords" :key="r.id" :timestamp="fmt(r.createdAt)" placement="top"
                             :type="r.severity === 'NORMAL' ? 'primary' : r.severity === 'ATTENTION' ? 'warning' : 'danger'">
@@ -158,5 +168,6 @@ onMounted(loadChildren)
 .ml4 { margin-left: 4px; }
 .pt8 { padding-top: 8px; }
 .inner { background: #fafafa; }
-.med-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.med-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+.muted { color: #909399; font-size: 12px; }
 </style>

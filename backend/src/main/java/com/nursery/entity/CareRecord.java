@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "care_records")
 public class CareRecord {
 
-    public enum CareType { NOON_CARE, MEDICATION, TOILET, SLEEP, INJURY }
+    public enum CareType { NOON_CARE, MEDICATION, TOILET, SLEEP, INJURY, MEAL }
 
     public enum Severity { NORMAL, ATTENTION, SERIOUS }
 

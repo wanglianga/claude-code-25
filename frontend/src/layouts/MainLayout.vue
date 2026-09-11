@@ -50,12 +50,17 @@ const role = computed(() => auth.role)
 
 const menus = [
   { path: '/parent/enrollment', title: '入托申请', icon: 'DocumentAdd', roles: ['PARENT'] },
+  { path: '/parent/meal-subs', title: '替换餐确认', icon: 'Food', roles: ['PARENT'] },
   { path: '/director/tasks', title: '入托评估任务', icon: 'Checked', roles: ['DIRECTOR'] },
   { path: '/director/classes', title: '班级管理', icon: 'School', roles: ['DIRECTOR'] },
   { path: '/director/alerts', title: '异常预警', icon: 'WarningFilled', roles: ['DIRECTOR', 'HEALTH'] },
   { path: '/health/tasks', title: '健康评估', icon: 'FirstAidKit', roles: ['HEALTH'] },
+  { path: '/health/meal-subs', title: '替换餐确认', icon: 'Food', roles: ['HEALTH'] },
   { path: '/teacher/morning-check', title: '每日晨检', icon: 'Sunny', roles: ['TEACHER'] },
   { path: '/teacher/day-care', title: '在园照护记录', icon: 'Notebook', roles: ['TEACHER'] },
+  { path: '/teacher/meal-serving', title: '分餐与替换餐', icon: 'Food', roles: ['TEACHER'] },
+  { path: '/kitchen/menus', title: '每日菜单', icon: 'Menu', roles: ['KITCHEN'] },
+  { path: '/kitchen/substitutions', title: '替换餐执行', icon: 'Stamp', roles: ['KITCHEN'] },
   { path: '/frontdesk/pickup', title: '接送核验', icon: 'Van', roles: ['FRONTDESK'] }
 ]
 

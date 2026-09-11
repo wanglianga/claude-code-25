@@ -1,0 +1,74 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*secret*
+*token*
+*credential*
+*credentials*
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+
+# Java / Spring Boot
+target/
+backend/target/
+*.class
+*.jar
+*.war
+
+# Build, coverage, and caches
+build/
+coverage/
+.coverage
+.cache/
+.mvn/
+*.log
+logs/
+tmp/
+temp/
+
+# Local databases and runtime state
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+postgres-data/
+data/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Claude Code, skills, memory, traces, and QA artifacts
+.claude/
+CLAUDE.md
+claude/
+Claude/
+memory/
+**/memory/
+skill/
+skills/
+**/skill/
+**/skills/
+*_traces/
+*_traces_*/
+traces/
+qa/
+QA/
+qa-output/
+qa-artifacts/
+playwright-report/
+test-results/
+*.trace.zip
+*.har

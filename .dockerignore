@@ -1,0 +1,10 @@
+# 构建上下文忽略
+.git
+**/node_modules
+**/dist
+**/target
+**/*.log
+.env
+.claude
+CLAUDE.md
+README.md

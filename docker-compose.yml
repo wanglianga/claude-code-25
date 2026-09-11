@@ -1,0 +1,41 @@
+# 城市托育中心入托评估与接送交接平台
+# 项目名由环境变量 COMPOSE_PROJECT_NAME 固定，不要在此写死 name:
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nursery
+      POSTGRES_USER: nursery
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nursery123}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nursery -d nursery"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - internal
+    # 数据库不发布到宿主端口，仅在 compose 内部网络访问
+
+  app:
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/nursery
+      SPRING_DATASOURCE_USERNAME: nursery
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-nursery123}
+      JWT_SECRET: ${JWT_SECRET:-nursery-default-secret-key-0123456789abcdef0123456789abcdef}
+    ports:
+      # 仅应用服务发布到宿主端口（宿主端口由 CC_PUBLISH_PORT 指定）
+      - "${CC_PUBLISH_PORT}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  pgdata:

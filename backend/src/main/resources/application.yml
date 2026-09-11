@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: nursery-platform
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nursery}
+    username: ${SPRING_DATASOURCE_USERNAME:nursery}
+    password: ${SPRING_DATASOURCE_PASSWORD:nursery123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Shanghai
+  jackson:
+    time-zone: Asia/Shanghai
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+app:
+  jwt-secret: ${JWT_SECRET:nursery-default-secret-key-0123456789abcdef0123456789abcdef}
+  jwt-expire-hours: ${JWT_EXPIRE_HOURS:24}
+  # 同一儿童在 window-days 内异常记录达到 threshold 次即生成预警
+  anomaly:
+    window-days: 30
+    threshold: 3

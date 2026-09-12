@@ -1,7 +1,6 @@
 package com.nursery.config;
 
 import com.nursery.entity.User;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,9 +9,9 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * 登录主体，从 JWT 还原
+ * 登录主体，从 JWT 还原。
+ * 访问器显式实现（不依赖 Lombok），保证 UserDetails 契约在任何编译配置下都成立。
  */
-@Getter
 public class AuthUser implements UserDetails {
 
     private final Long id;
@@ -31,9 +30,26 @@ public class AuthUser implements UserDetails {
         return new AuthUser(u.getId(), u.getUsername(), u.getName(), u.getRole());
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public User.Role getRole() {
+        return role;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
     }
 
     @Override
